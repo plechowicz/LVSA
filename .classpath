@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.8.0_25"/>
-	<classpathentry kind="lib" path="C:/Users/Piotr/Desktop/JavaLibrariesAndOthers/commons-math3-3.3-bin/commons-math3-3.3/commons-math3-3.3.jar" sourcepath="C:/Users/Piotr/Desktop/JavaLibrariesAndOthers/commons-math3-3.3-bin/commons-math3-3.3-src/commons-math3-3.3-src"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-math3-3.5.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -14,22 +14,24 @@ import javax.sound.sampled.UnsupportedAudioFileException;
 import access.mypackage.offdebug.Debug;
 
 /********************************************************************************************
- * Klasa AudioFileOperations 
+ * Klasa AudioFileOperations
  * 
- * Klasa przeznaczona do ró¿nych operacji na plikach audio wliczaj¹c w to
- * otwierania i zapisywania plików, konwersjê z danych w postaci tablicy bajtów 
- * na tablicê floatów czy te¿ normalizacjê.
+ * Klasa przeznaczona do rï¿½nych operacji na plikach audio wliczajï¿½c w to
+ * otwierania i zapisywania plikï¿½w, konwersjï¿½ z danych w postaci tablicy bajtï¿½w
+ * na tablicï¿½ floatï¿½w czy teï¿½ normalizacjï¿½.
  * 
- * ******************************************************************************************
+ * *****************************************************************************
+ * *************
  */
 public class AudioFileOperations {
-	
-	/**----------------------------------------------------------------------
+
+	/**
+	 * ----------------------------------------------------------------------
 	 * Pola prywatne klasy
 	 * 
 	 * ----------------------------------------------------------------------
 	 */
-	
+
 	private static AudioInputStream audioInputStream = null;
 	private static final int BUFFER_SIZE = 8192;
 	private static byte[] audioBytes;
@@ -37,65 +39,70 @@ public class AudioFileOperations {
 	private static float sampleRate = 44100.0F;
 	private static int sampleSizeInBits = 16;
 	private static int channels = 1;
-	private static int frameSize = sampleSizeInBits / 8 * channels;	
+	private static int frameSize = sampleSizeInBits / 8 * channels;
 	private static float frameRate = 44100.0F;
 	private static boolean isBigEndian = false;
-	private static AudioFormat audioFormat = new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels, frameSize, frameRate, isBigEndian);
+	private static AudioFormat audioFormat = new AudioFormat(encoding, sampleRate, sampleSizeInBits, channels,
+			frameSize, frameRate, isBigEndian);
 	private static final Object audioArrayLock = new Object();
-	
-	
-	
-	/**----------------------------------------------------------------------------
-	 * Metody publiczne
-	 * 
-	 * ----------------------------------------------------------------------------
-	 */
-	
-	
+
 	/**
-	 * Otworzenie strumienia z pliku o podanej œcie¿ce.
-	 * Je¿eli wyst¹pi¹ b³êdy audioInputStream jest ustawiony na null.     
-	 * @param filePath œcie¿ka do pliku
-	 * @return zmienna typu boolean okreœlaj¹ca czy uda³o siê otworzyæ plik
+	 * -------------------------------------------------------------------------
+	 * --- Metody publiczne
+	 * 
+	 * -------------------------------------------------------------------------
+	 * ---
+	 */
+
+	/**
+	 * Otworzenie strumienia z pliku o podanej ï¿½cieï¿½ce. Jeï¿½eli wystï¿½piï¿½ bï¿½ï¿½dy
+	 * audioInputStream jest ustawiony na null.
+	 * 
+	 * @param filePath
+	 *            ï¿½cieï¿½ka do pliku
+	 * @return zmienna typu boolean okreï¿½lajï¿½ca czy udaï¿½o siï¿½ otworzyï¿½ plik
 	 */
 	public static boolean openFile(String filePath) {
 		File file = new File(filePath);
-		
+
 		try {
 			AudioInputStream audioTempInputStream = AudioSystem.getAudioInputStream(file);
-			
-			//Stworzenie strumienia z odpowiednim formatem audio
+
+			// Stworzenie strumienia z odpowiednim formatem audio
 			audioInputStream = AudioSystem.getAudioInputStream(audioFormat, audioTempInputStream);
-			
+
 		} catch (UnsupportedAudioFileException e) {
 			Dialogs.showMessage("Unsupported audio file format.");
 			Debug.debug(e.toString());
 			audioInputStream = null;
-			return false;			
+			return false;
 		} catch (IOException e) {
 			Debug.debug(e.toString());
 			audioInputStream = null;
 			return false;
 		}
 		return convertStreamIntoByteArray();
-		
+
 	}
-	
+
 	/**
-	 * Zapisanie tablicy bajtów do pliku zawieraj¹cych sygna³ audio.
-	 * Je¿eli pojawi¹ siê b³êdy podczas zapisu, funkcja zwraca false.
-	 * @param tablica bajtów reprezentuj¹ca sygna³ audio
-	 * @param œcie¿ka do pliku
-	 * @return zmienna typu boolean okreœlaj¹ca czy operacja siê powiod³a
+	 * Zapisanie tablicy bajtï¿½w do pliku zawierajï¿½cych sygnaï¿½ audio. Jeï¿½eli
+	 * pojawiï¿½ siï¿½ bï¿½ï¿½dy podczas zapisu, funkcja zwraca false.
+	 * 
+	 * @param tablica
+	 *            bajtï¿½w reprezentujï¿½ca sygnaï¿½ audio
+	 * @param ï¿½cieï¿½ka
+	 *            do pliku
+	 * @return zmienna typu boolean okreï¿½lajï¿½ca czy operacja siï¿½ powiodï¿½a
 	 */
 	public static boolean saveFile(byte[] data, String path) {
 		ByteArrayInputStream bais = new ByteArrayInputStream(data);
 		AudioInputStream audioInputStreamToSave;
 		audioInputStreamToSave = new AudioInputStream(bais, audioFormat, data.length / audioFormat.getFrameSize());
 		File file = new File(path);
-		
-		int numBytesToWrite = data.length; 
-		while(numBytesToWrite > 0) {
+
+		int numBytesToWrite = data.length;
+		while (numBytesToWrite > 0) {
 			try {
 				numBytesToWrite -= AudioSystem.write(audioInputStreamToSave, AudioFileFormat.Type.WAVE, file);
 			} catch (IOException e) {
@@ -105,125 +112,134 @@ public class AudioFileOperations {
 		}
 		return true;
 	}
-	
+
 	/**
-	 * Konwersja tablicy bajtów na tablicê floatów z zakresu -1 do 1
-	 * @param bytesArray tablica bajtów reprezentuj¹ca sygna³ audio
-	 * @return tablica floatów reprezentuj¹ca sygna³ audio
+	 * Konwersja tablicy bajtï¿½w na tablicï¿½ floatï¿½w z zakresu -1 do 1
+	 * 
+	 * @param bytesArray
+	 *            tablica bajtï¿½w reprezentujï¿½ca sygnaï¿½ audio
+	 * @return tablica floatï¿½w reprezentujï¿½ca sygnaï¿½ audio
 	 */
 	public static float[] byteArrayIntoFloatArray(byte[] bytesArray) {
-		
-		//rozmiar sampla w bitach
+
+		// rozmiar sampla w bitach
 		final int bitsPerSample = AudioFileOperations.getAudioFormat().getSampleSizeInBits();
-		//rozmiar sampla w bajtach
-		//ka¿dy bajt ma 8 bitów
+		// rozmiar sampla w bajtach
+		// kaï¿½dy bajt ma 8 bitï¿½w
 		final int bytesPerSample = bitsPerSample / 8;
-		
+
 		int numOfBytes = bytesArray.length;
-		int numOfSamples = numOfBytes/bytesPerSample;
+		int numOfSamples = numOfBytes / bytesPerSample;
 		long[] transfer = new long[numOfSamples];
 		float[] samples = new float[numOfSamples];
-		
-		//Dla ka¿dego sampla
-		for(int i = 0, k = 0, b; i < numOfBytes; i+= bytesPerSample, k++) {
+
+		// Dla kaï¿½dego sampla
+		for (int i = 0, k = 0, b; i < numOfBytes; i += bytesPerSample, k++) {
 			transfer[k] = 0L;
-			//Dla ka¿dego bajtu w samplu
-			//Poniewa¿ kodowanie jest w little-endian to trzeba drugi bajt przesun¹æ o 8 bitów w lewo
-			//gdyby by³ 3ci bajt to o 16 bitów w lewo itd.
-			for(b = 0; b < bytesPerSample; b++)
-				transfer[k] |= ((bytesArray[i+b] & 0xffL) << (8*b));
+			// Dla kaï¿½dego bajtu w samplu
+			// Poniewaï¿½ kodowanie jest w little-endian to trzeba drugi bajt
+			// przesunï¿½ï¿½ o 8 bitï¿½w w lewo
+			// gdyby byï¿½ 3ci bajt to o 16 bitï¿½w w lewo itd.
+			for (b = 0; b < bytesPerSample; b++)
+				transfer[k] |= ((bytesArray[i + b] & 0xffL) << (8 * b));
 		}
-		
-		//policzenie ile bajtów jest niezajêtych przez sampel w zmiennej typu long
+
+		// policzenie ile bajtï¿½w jest niezajï¿½tych przez sampel w zmiennej typu
+		// long
 		final int signShift = 64 - bitsPerSample;
-		
-		//Dla ka¿dego sampla przesuñ go w lewo o iloœæ miejsc nie okreœlaj¹cych wartoœci
-		//i w prawo o t¹ sam¹ wartoœæ (wype³nienie jedynkami z przodu wartoœci ujemnych)
-		for(int i = 0; i < transfer.length; i++)
+
+		// Dla kaï¿½dego sampla przesuï¿½ go w lewo o iloï¿½ï¿½ miejsc nie okreï¿½lajï¿½cych
+		// wartoï¿½ci
+		// i w prawo o tï¿½ samï¿½ wartoï¿½ï¿½ (wypeï¿½nienie jedynkami z przodu wartoï¿½ci
+		// ujemnych)
+		for (int i = 0; i < transfer.length; i++)
 			transfer[i] = ((transfer[i] << signShift) >> signShift);
-		
-		//maksymalna wartoœæ dodatnia sygna³u dla danej g³êbi bitowej
-		final long fullScale = (long)Math.pow(2.0, bitsPerSample - 1) - 1;
-		
-		
-		//Podziel ka¿d¹ wartoœæ przez najwiêksz¹ mo¿liw¹ w danej g³êbi bitowej
-		for(int i = 0; i < transfer.length; i++)
-			samples[i] = (float)transfer[i] / (float)fullScale;
-		
+
+		// maksymalna wartoï¿½ï¿½ dodatnia sygnaï¿½u dla danej gï¿½ï¿½bi bitowej
+		final long fullScale = (long) Math.pow(2.0, bitsPerSample - 1) - 1;
+
+		// Podziel kaï¿½dï¿½ wartoï¿½ï¿½ przez najwiï¿½kszï¿½ moï¿½liwï¿½ w danej gï¿½ï¿½bi bitowej
+		for (int i = 0; i < transfer.length; i++)
+			samples[i] = (float) transfer[i] / (float) fullScale;
+
 		return samples;
 	}
-	
+
 	/**
-	 * Normalizacja do najwiêkszej próbki
+	 * Normalizacja do najwiï¿½kszej prï¿½bki
 	 */
 	public static void normalized(float[] samples) {
 		float maxValue = 0;
-		for(int i = 0; i < samples.length; i ++)
+		for (int i = 0; i < samples.length; i++)
 			if (maxValue < Math.abs(samples[i]))
 				maxValue = Math.abs(samples[i]);
-		
-		
-		for(int i = 0; i < samples.length; i++)
-			samples[i] = samples[i]/maxValue;
+
+		for (int i = 0; i < samples.length; i++)
+			samples[i] = samples[i] / maxValue;
 	}
-	
-	/**--------------------------------------------------------------------------
-	 *
-	 *	Gettery
-	 *
-	 *---------------------------------------------------------------------------
-	 */
-	
+
 	/**
-	 * Otrzymanie tablicy bajtów reprezentuj¹cych sygna³ audio
-	 * @return byte[] sygna³ audio w bajtach
+	 * -------------------------------------------------------------------------
+	 * -
+	 *
+	 * Gettery
+	 *
+	 * -------------------------------------------------------------------------
+	 * --
+	 */
+
+	/**
+	 * Otrzymanie tablicy bajtï¿½w reprezentujï¿½cych sygnaï¿½ audio
+	 * 
+	 * @return byte[] sygnaï¿½ audio w bajtach
 	 */
 	public static byte[] getByteArrayWithAudio() {
-		synchronized(audioArrayLock) {
+		synchronized (audioArrayLock) {
 			return audioBytes.clone();
 		}
 	}
-	
+
 	/**
-	 * Zwraca domyœlny format audio u¿ywany w aplikacji.
+	 * Zwraca domyï¿½lny format audio uï¿½ywany w aplikacji.
+	 * 
 	 * @return AudioFormat
 	 */
-	public static AudioFormat getAudioFormat(){
+	public static AudioFormat getAudioFormat() {
 		return audioFormat;
 	}
-	
-	
 
-	/**-------------------------------------------------------------------------------
-	 * Metody prywatne
-	 * 
-	 * -------------------------------------------------------------------------------
-	 */
-	
-	
 	/**
-	 * Konwersja strumienia wejœciowego audio w tablicê bajtów.
-	 * @return zmienna typu boolean okreœlaj¹ca powodzenie operacji 
+	 * -------------------------------------------------------------------------
+	 * ------ Metody prywatne
+	 * 
+	 * -------------------------------------------------------------------------
+	 * ------
 	 */
-	private static boolean convertStreamIntoByteArray(){
+
+	/**
+	 * Konwersja strumienia wejï¿½ciowego audio w tablicï¿½ bajtï¿½w.
+	 * 
+	 * @return zmienna typu boolean okreï¿½lajï¿½ca powodzenie operacji
+	 */
+	private static boolean convertStreamIntoByteArray() {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		byte[] data = new byte[BUFFER_SIZE];
 		int numBytesRead = 0;
 		try {
-			while((numBytesRead = audioInputStream.read(data)) != -1)
+			while ((numBytesRead = audioInputStream.read(data)) != -1)
 				out.write(data, 0, numBytesRead);
 		} catch (IOException e) {
 			Debug.debug(e.toString());
 			return false;
 		}
-		
-		synchronized(audioArrayLock) {
+
+		synchronized (audioArrayLock) {
 			audioBytes = new byte[out.size()];
 			audioBytes = out.toByteArray();
 		}
-		
+
 		audioInputStream = null;
-		
+
 		try {
 			out.flush();
 			out.close();
